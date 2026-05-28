@@ -1,54 +1,42 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "mongodb"
-}
-
 model Hotel {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
   title       String
+  price       Int
   description String
   location    String
-  price       Int
-  date        DateTime @default(now())
-  lat         Float
-  lng         Float
-  images      Image[]
-  reviews     Review[]
-  author      User     @relation(fields: [authorId], references: [id])
-  authorId    String   @db.ObjectId
+  date        DateTime?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
+  geometry Json
+  images   Json
+  reviews  Json
 
-model Image {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  url      String
-  filename String
-  hotel    Hotel  @relation(fields: [hotelId], references: [id])
-  hotelId  String @db.ObjectId
-}
+  authorId String? @db.ObjectId @map("author")
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 
-model Review {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  body      String
-  rating    Int
-  date      DateTime @default(now())
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  String   @db.ObjectId
-  hotel     Hotel    @relation(fields: [hotelId], references: [id])
-  hotelId   String   @db.ObjectId
+  @@map("hotels")
 }
 
 model User {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  email    String   @unique
-  username String   @unique
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique
+  username String @unique
   password String
-  hotels   Hotel[]
-  reviews  Review[]
-  role String @default("USER")
+  role     String @default("USER")
+}
+
+model Review {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  body   String
+  rating Int
+  date   DateTime @default(now())
 }
