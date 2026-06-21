@@ -1,24 +1,44 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+
+const nextAuthSecret = process.env.NEXTAUTH_SECRET ?? "development-secret";
+if (!process.env.NEXTAUTH_SECRET) {
+  console.warn("NEXTAUTH_SECRET is not set. Using fallback development secret.");
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || typeof credentials.email !== "string") {
+        if (!credentials?.username || typeof credentials.username !== "string" || !credentials?.password) {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: credentials.username },
+              { username: credentials.username }
+            ]
+          },
         });
 
-        return user ?? null;
+        if (!user) return null;
+
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password as string,
+          user.password
+        );
+
+        if (!isPasswordValid) return null;
+
+        return { id: user.id, name: user.username, email: user.email };
       },
     }),
   ],
@@ -26,4 +46,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
   },
+
+  pages: {
+    signIn: "/login",
+  },
+
+  secret: nextAuthSecret,
 });
