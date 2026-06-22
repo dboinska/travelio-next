@@ -1,15 +1,17 @@
 import Link from "next/link";
-import { ClusterMap } from "../components/hotels/ClusterMap";
+import HotelsMapSidebar from "../components/hotels/HotelsMapSidebar";
 import HotelsGrid from "../components/hotels/HotelsGrid";
 import HotelsPagination from "../components/hotels/HotelsPagination";
 import { prisma } from "@/lib/prisma";
+import Navbar from "../components/Navbar";
+import { hotelsToGeoJSON } from "@/lib/hotelsToGeoJSON";
 
-const HOTELS_PER_PAGE = 9;
+const HOTELS_PER_PAGE = 12;
 
 interface Props {
-  searchParams: Promise<{
+  searchParams: {
     page?: string;
-  }>;
+  };
 }
 
 async function getHotels(page: number) {
@@ -29,33 +31,36 @@ async function getHotels(page: number) {
   };
 }
 
-export default async function HotelsPage({ searchParams }: Props) {
+export default async function Hotels({ searchParams }: Props) {
   const params = await searchParams;
-
-  const currentPage = Number(params.page || 1);
+  const currentPage = Math.max(1, Number(params.page) || 1);
   const data = await getHotels(currentPage);
+  const geoJSONData = hotelsToGeoJSON(data.hotels);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-10 px-4 py-10">
-      <ClusterMap />
+    <>
+      <Navbar />
+      <main className="mx-auto max-w-7xl space-y-10 px-4 py-10">
+        <HotelsMapSidebar hotels={data.hotels} geoJSONData={geoJSONData} />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-bold text-white">All Hotels</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl font-bold text-white">All Hotels</h1>
 
-        <Link
-          href="/hotels/new"
-          className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-500"
-        >
-          Add Hotel
-        </Link>
-      </div>
+          <Link
+            href="/hotels/new"
+            className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-500"
+          >
+            Add Hotel
+          </Link>
+        </div>
 
-      <HotelsGrid hotels={data.hotels} />
+        <HotelsGrid hotels={data.hotels} />
 
-      <HotelsPagination
-        currentPage={currentPage}
-        totalPages={data.totalPages}
-      />
-    </main>
+        <HotelsPagination
+          currentPage={currentPage}
+          totalPages={data.totalPages}
+        />
+      </main>
+    </>
   );
 }
