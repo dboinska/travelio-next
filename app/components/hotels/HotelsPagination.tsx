@@ -5,40 +5,92 @@ interface Props {
   totalPages: number;
 }
 
+function getPaginationRange(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, 5];
+  }
+
+  if (currentPage >= totalPages - 2) {
+    return [
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+
+  return [
+    currentPage - 2,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    currentPage + 2,
+  ];
+}
+
 export default function HotelsPagination({ currentPage, totalPages }: Props) {
   if (totalPages <= 1) return null;
 
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const pageRange = getPaginationRange(currentPage, totalPages);
+  const showRightEllipsis = pageRange[pageRange.length - 1] < totalPages - 1;
 
   return (
-    <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
-      <Link
-        href={`/hotels?page=${Math.max(currentPage - 1, 1)}`}
-        className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-white transition hover:bg-zinc-800"
-      >
-        Previous
-      </Link>
-
-      {pages.map((page) => (
-        <Link
-          key={page}
-          href={`/hotels?page=${page}`}
-          className={`rounded-lg px-4 py-2 text-sm transition ${
-            currentPage === page
-              ? "bg-blue-600 text-white"
-              : "border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
-          }`}
-        >
-          {page}
+    <ul className="pagination mt-10">
+      <li className="circle">
+        <Link href="/hotels?page=1" className="page-link">
+          First
         </Link>
+      </li>
+
+      {pageRange[0] > 1 && (
+        <li className="circle">
+          <Link href={`/hotels?page=${pageRange[0] - 1}`} className="page-link">
+            ...
+          </Link>
+        </li>
+      )}
+
+      {pageRange.map((page) => (
+        <li key={page} className="circle">
+          <Link
+            href={`/hotels?page=${page}`}
+            className={`page-link ${currentPage === page ? "active" : ""}`}
+          >
+            {page}
+          </Link>
+        </li>
       ))}
 
-      <Link
-        href={`/hotels?page=${Math.min(currentPage + 1, totalPages)}`}
-        className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-white transition hover:bg-zinc-800"
-      >
-        Next
-      </Link>
-    </div>
+      {showRightEllipsis && (
+        <li className="circle">
+          <Link
+            href={`/hotels?page=${pageRange[pageRange.length - 1] + 1}`}
+            className="page-link hover-off"
+          >
+            ...
+          </Link>
+        </li>
+      )}
+
+      <li className="circle">
+        <Link
+          href={`/hotels?page=${Math.min(currentPage + 1, totalPages)}`}
+          className="page-link"
+        >
+          Next
+        </Link>
+      </li>
+
+      <li className="circle">
+        <Link href={`/hotels?page=${totalPages}`} className="page-link">
+          Last
+        </Link>
+      </li>
+    </ul>
   );
 }
