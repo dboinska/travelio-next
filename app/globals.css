@@ -24,3 +24,47 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.circle {
+  display: flex;
+}
+
+.page-link {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #71717a; /* zinc-500 */
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.page-link:hover {
+  background: linear-gradient(to right, #30cfd0, #0c5eb6);
+  color: white;
+}
+
+.page-link.active {
+  background: linear-gradient(to right, #30cfd0, #0c5eb6);
+  color: white;
+  box-shadow: 0 4px 12px rgba(12, 94, 182, 0.4);
+}
+
+.page-link.hover-off:hover {
+  background: none;
+  color: #71717a;
+}
