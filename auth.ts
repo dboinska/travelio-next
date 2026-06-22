@@ -3,9 +3,9 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-const nextAuthSecret = process.env.NEXTAUTH_SECRET ?? "development-secret";
-if (!process.env.NEXTAUTH_SECRET) {
-  console.warn("NEXTAUTH_SECRET is not set. Using fallback development secret.");
+const nextAuthSecret = process.env.AUTH_SECRET ?? "development-secret";
+if (!process.env.AUTH_SECRET) {
+  console.warn("AUTH_SECRET is not set. Using fallback development secret.");
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
