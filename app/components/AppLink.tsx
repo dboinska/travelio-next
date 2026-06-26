@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { brandGradientBgAnimated } from "@/lib/design/classes";
 import "./AppLink.css";
 
 type AppLinkProps = React.ComponentProps<typeof Link> & {
@@ -15,11 +16,13 @@ export function AppLink({
     "inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition";
 
   const variants = {
-    primary:
-      "bg-gradient-to-r from-[#30cfd0] via-[#2a7de1] to-[#0c5eb6] bg-[length:200%_200%] animate-gradient-x transition hover:brightness-110 text-[#171717]",
+    primary: cn(
+      brandGradientBgAnimated,
+      "hover:brightness-110",
+    ),
     secondary:
-      "border border-slate-800 text-slate-200 hover:border-slate-700 hover:bg-slate-900",
-    ghost: "text-slate-200 hover:text-white",
+      "border border-border bg-surface text-white/90 hover:border-white/20 hover:bg-surface/90",
+    ghost: "text-slate-300 hover:text-white",
   };
 
   return <Link {...props} className={cn(base, variants[variant], className)} />;

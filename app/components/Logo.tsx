@@ -1,10 +1,15 @@
 import Link from "next/link";
+import { brandGradientText } from "@/lib/design/classes";
+import { cn } from "@/lib/cn";
 
 export const Logo = () => {
   return (
     <Link
       href="/"
-      className="text-sm uppercase tracking-[0.4em] font-semibold bg-gradient-to-r mr-6 from-[#30cfd0] to-[#0c5eb6] bg-clip-text text-transparent"
+      className={cn(
+        "mr-6 text-sm font-semibold uppercase tracking-[0.4em]",
+        brandGradientText,
+      )}
     >
       Travelio.
     </Link>

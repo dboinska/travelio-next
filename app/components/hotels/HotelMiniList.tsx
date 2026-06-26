@@ -1,64 +1,60 @@
 import Link from "next/link";
-import { Hotel } from "@/lib/types/hotel";
+import { ArrowRight } from "lucide-react";
+import { Hotel, getHotelImages } from "@/lib/types/hotel";
 
 interface Props {
   hotels: Hotel[];
 }
 
 export default function HotelMiniList({ hotels }: Props) {
-  const featuredHotels = hotels.slice(0, 5);
-
   return (
-    <aside className="h-full flex flex-col overflow-hidden">
-      <div className="shrink-0 space-y-2 pb-2">
-        <p className="text-sm uppercase tracking-[0.3em] text-zinc-500">
-          Top hotele
+    <aside className="flex h-full flex-col overflow-hidden">
+      <div className="shrink-0 space-y-1 pb-3">
+        <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-500">
+          On this page
         </p>
-        <h2 className="text-lg font-bold text-white">
-          Znaleziono {hotels.length} wyników
+        <h2 className="text-base font-semibold tracking-wide text-white">
+          {hotels.length} {hotels.length === 1 ? "stay" : "stays"}
         </h2>
       </div>
 
-      <div className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-2">
-        {featuredHotels.map((hotel) => (
-          <div
-            key={hotel.id}
-            className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-white">
+      <div className="custom-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto pr-1.5">
+        {hotels.map((hotel) => {
+          const coverImage = getHotelImages(hotel)[0];
+
+          return (
+            <Link
+              key={hotel.id}
+              href={`/hotels/${hotel.id}`}
+              className="group flex gap-3 rounded-xl border border-border bg-surface/60 p-2.5 transition hover:border-[#30cfd0]/30 hover:bg-surface"
+            >
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-background">
+                {coverImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={coverImage.url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : null}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold text-white group-hover:text-cyan-50">
                   {hotel.title}
                 </h3>
-                <p className="mt-1 text-sm text-zinc-400">{hotel.location}</p>
+                <p className="truncate text-xs text-slate-500">{hotel.location}</p>
+                <p className="mt-1 text-xs font-medium text-[#30cfd0]/90">
+                  ${hotel.price} / night
+                </p>
               </div>
-              <span className="rounded-full bg-blue-600 px-3 py-1 text-sm font-semibold text-white">
-                ${hotel.price}
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between gap-3 text-sm text-zinc-400">
-              <span>
-                {hotel.date
-                  ? new Date(hotel.date).toLocaleDateString()
-                  : "Brak daty"}
-              </span>
-              <Link
-                href={`/hotels/${hotel.id}`}
-                className="rounded-full bg-white/5 px-3 py-1 font-medium text-white transition hover:bg-white/10"
-              >
-                Zobacz
-              </Link>
-            </div>
-          </div>
-        ))}
+              <ArrowRight
+                size={14}
+                className="mt-1 shrink-0 text-muted transition group-hover:text-[#30cfd0]"
+              />
+            </Link>
+          );
+        })}
       </div>
-
-      {hotels.length > featuredHotels.length && (
-        <p className="shrink-0 pt-2 text-xs text-zinc-500">
-          +{hotels.length - featuredHotels.length} więcej
-        </p>
-      )}
     </aside>
   );
 }

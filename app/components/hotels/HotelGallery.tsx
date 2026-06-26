@@ -27,7 +27,7 @@ export default function HotelGallery({
 
   if (!images.length) {
     return (
-      <div className="flex h-125 items-center justify-center rounded-3xl bg-zinc-900 text-slate-500">
+      <div className="flex h-125 items-center justify-center rounded-3xl border border-border bg-surface text-muted">
         No image available
       </div>
     );
@@ -123,7 +123,7 @@ export default function HotelGallery({
               }}
               className="
                 relative h-20 w-28 shrink-0 cursor-pointer
-                overflow-hidden rounded-xl border border-zinc-800
+                overflow-hidden rounded-xl border border-border
               "
             >
               <Image

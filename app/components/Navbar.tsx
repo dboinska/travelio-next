@@ -24,7 +24,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-background/80 backdrop-blur">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <div className="flex row gap-2">
           <Logo />
@@ -48,7 +48,7 @@ export default function Navbar() {
                 aria-label="Open user menu"
                 type="button"
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-950 px-3 py-2 transition hover:bg-zinc-900"
+                className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 transition hover:bg-surface/80"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -69,10 +69,10 @@ export default function Navbar() {
               </button>
 
               {open && (
-                <div className="absolute right-0 mt-2 w-40 rounded bg-zinc-950 border border-zinc-700 p-1 shadow-lg">
+                <div className="absolute right-0 mt-2 w-40 rounded border border-border bg-surface p-1 shadow-lg">
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
-                    className="w-full rounded px-3 py-2 text-left text-sm text-white hover:bg-zinc-900"
+                    className="w-full rounded px-3 py-2 text-left text-sm text-white hover:bg-background"
                   >
                     Wyloguj
                   </button>

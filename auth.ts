@@ -9,6 +9,7 @@ if (!process.env.AUTH_SECRET) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {
@@ -16,7 +17,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || typeof credentials.username !== "string" || !credentials?.password) {
+        if (
+          !credentials?.username ||
+          typeof credentials.username !== "string" ||
+          !credentials?.password
+        ) {
           return null;
         }
 
@@ -24,8 +29,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: {
             OR: [
               { email: credentials.username },
-              { username: credentials.username }
-            ]
+              { username: credentials.username },
+            ],
           },
         });
 
@@ -33,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.password,
         );
 
         if (!isPasswordValid) return null;
@@ -42,14 +47,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-
   session: {
     strategy: "jwt",
   },
-
   pages: {
     signIn: "/login",
   },
-
   secret: nextAuthSecret,
 });
+
+export const { GET, POST } = handlers;

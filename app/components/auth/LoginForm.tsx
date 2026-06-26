@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, type SignInResponse } from "next-auth/react";
+import { brandGradientBg, inputClassName, labelClassName } from "@/lib/design/classes";
+import { cn } from "@/lib/cn";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -46,10 +48,7 @@ export default function LoginForm() {
       {error && <div className="text-sm text-red-400">{error}</div>}
 
       <div>
-        <label
-          className="block text-sm font-medium text-zinc-300 mb-2"
-          htmlFor="username"
-        >
+        <label className={labelClassName} htmlFor="username">
           Username
         </label>
         <input
@@ -58,16 +57,13 @@ export default function LoginForm() {
           placeholder="jan.kowalski"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className={inputClassName}
           required
         />
       </div>
 
       <div>
-        <label
-          className="block text-sm font-medium text-zinc-300 mb-2"
-          htmlFor="password"
-        >
+        <label className={labelClassName} htmlFor="password">
           Password
         </label>
         <input
@@ -77,23 +73,26 @@ export default function LoginForm() {
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className={inputClassName}
           required
         />
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <label className="inline-flex items-center gap-2 text-sm text-zinc-300">
+        <label className="inline-flex items-center gap-2 text-sm text-slate-400">
           <input
             type="checkbox"
-            className="rounded text-blue-600 focus:ring-blue-500"
+            className="rounded border-border text-[#30cfd0] focus:ring-[#30cfd0]/30"
           />
           Remember me
         </label>
 
         <button
           type="submit"
-          className="ml-auto rounded-full bg-linear-to-r from-blue-600 to-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow hover:opacity-95 disabled:opacity-50 transition"
+          className={cn(
+            "ml-auto rounded-full px-5 py-2 text-sm font-semibold shadow transition hover:brightness-110 disabled:opacity-50",
+            brandGradientBg,
+          )}
           disabled={loading}
         >
           {loading ? "Logging in..." : "Login"}
