@@ -2,13 +2,12 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { authSecret } from "@/lib/auth/secret";
 
-const nextAuthSecret = process.env.AUTH_SECRET ?? "development-secret";
-if (!process.env.AUTH_SECRET) {
-  console.warn("AUTH_SECRET is not set. Using fallback development secret.");
-}
+export { authSecret };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {
@@ -16,7 +15,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || typeof credentials.username !== "string" || !credentials?.password) {
+        if (
+          !credentials?.username ||
+          typeof credentials.username !== "string" ||
+          !credentials?.password
+        ) {
           return null;
         }
 
@@ -24,8 +27,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: {
             OR: [
               { email: credentials.username },
-              { username: credentials.username }
-            ]
+              { username: credentials.username },
+            ],
           },
         });
 
@@ -33,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password as string,
-          user.password
+          user.password,
         );
 
         if (!isPasswordValid) return null;
@@ -42,14 +45,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-
   session: {
     strategy: "jwt",
   },
-
   pages: {
     signIn: "/login",
   },
-
-  secret: nextAuthSecret,
+  secret: authSecret,
 });
+
+export const { GET, POST } = handlers;

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { brandGradientBg, inputClassName, labelClassName } from "@/lib/design/classes";
+import { cn } from "@/lib/cn";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -34,7 +36,6 @@ export default function RegisterForm() {
         return;
       }
 
-      // after registration redirect to login or homepage
       router.push("/login");
     } catch {
       setError("Connection error");
@@ -48,10 +49,7 @@ export default function RegisterForm() {
       {error && <div className="text-sm text-red-400">{error}</div>}
 
       <div>
-        <label
-          className="block text-sm font-medium text-zinc-300 mb-2"
-          htmlFor="username"
-        >
+        <label className={labelClassName} htmlFor="username">
           Username
         </label>
         <input
@@ -60,16 +58,13 @@ export default function RegisterForm() {
           placeholder="jan.kowalski"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className={inputClassName}
           required
         />
       </div>
 
       <div>
-        <label
-          className="block text-sm font-medium text-zinc-300 mb-2"
-          htmlFor="email"
-        >
+        <label className={labelClassName} htmlFor="email">
           Email
         </label>
         <input
@@ -79,16 +74,13 @@ export default function RegisterForm() {
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className={inputClassName}
           required
         />
       </div>
 
       <div>
-        <label
-          className="block text-sm font-medium text-zinc-300 mb-2"
-          htmlFor="password"
-        >
+        <label className={labelClassName} htmlFor="password">
           Password
         </label>
         <input
@@ -98,7 +90,7 @@ export default function RegisterForm() {
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className={inputClassName}
           required
         />
       </div>
@@ -106,7 +98,10 @@ export default function RegisterForm() {
       <div className="text-end">
         <button
           type="submit"
-          className="rounded-full bg-linear-to-r from-green-500 to-teal-500 px-5 py-2 text-sm font-semibold text-white shadow hover:opacity-95 disabled:opacity-50 transition"
+          className={cn(
+            "rounded-full px-5 py-2 text-sm font-semibold shadow transition hover:brightness-110 disabled:opacity-50",
+            brandGradientBg,
+          )}
           disabled={loading}
         >
           {loading ? "Registering..." : "Register"}

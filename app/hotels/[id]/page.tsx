@@ -4,26 +4,19 @@ import { prisma } from "@/lib/prisma";
 import Navbar from "../../components/Navbar";
 import HotelMap from "../../components/hotels/HotelMap";
 import type { Hotel } from "@/lib/types/hotel";
+import { getHotelImages, getHotelReviews } from "@/lib/types/hotel";
 import HotelGallery from "@/app/components/hotels/HotelGallery";
+import {
+  cardInteractiveClassName,
+  inputClassName,
+  brandGradientBg,
+} from "@/lib/design/classes";
+import { extractHotelCoordinates } from "@/lib/hotels/extractHotelCoordinates";
+import { cn } from "@/lib/cn";
 
-type GeometryType = {
-  longitude?: number;
-  latitude?: number;
-  coordinates?: [number, number];
-};
-
-// Extract coordinates helper
 function extractCoordinates(hotel: Hotel): [number, number] | null {
-  const geom = hotel.geometry as GeometryType | null;
-
-  const lng = geom?.longitude;
-  const lat = geom?.latitude;
-
-  if (typeof lng === "number" && typeof lat === "number") {
-    return [lng, lat];
-  }
-
-  return null;
+  const coords = extractHotelCoordinates(hotel);
+  return coords ? [coords.lng, coords.lat] : null;
 }
 
 interface Props {
@@ -49,7 +42,7 @@ export default async function HotelPage({ params }: Props) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10 text-white">
         <h1 className="text-3xl font-bold">Missing hotel id</h1>
-        <pre className="mt-4 whitespace-pre-wrap bg-zinc-950 p-4 text-sm text-slate-300">
+        <pre className="mt-4 whitespace-pre-wrap rounded-xl border border-border bg-surface p-4 text-sm text-white/70">
           {JSON.stringify(resolvedParams, null, 2)}
         </pre>
       </main>
@@ -57,7 +50,6 @@ export default async function HotelPage({ params }: Props) {
   }
 
   const hotel = await getHotel(id);
-  console.log({ hotel });
 
   if (!hotel) {
     return (
@@ -73,16 +65,17 @@ export default async function HotelPage({ params }: Props) {
   }
 
   const coords = extractCoordinates(hotel);
+  const images = getHotelImages(hotel);
+  const reviews = getHotelReviews(hotel);
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-linear-to-b from-zinc-950 to-black pb-20">
-        {/* Hero Section */}
-        <div className="relative h-96 w-full overflow-hidden bg-zinc-900">
-          {hotel.images?.length ? (
+      <main className="min-h-screen bg-background pb-20">
+        <div className="relative h-96 w-full overflow-hidden bg-surface">
+          {images.length > 0 ? (
             <Image
-              src={hotel.images[0]?.url}
+              src={images[0].url}
               alt={hotel.title}
               width={1000}
               height={1000}
@@ -108,7 +101,7 @@ export default async function HotelPage({ params }: Props) {
           {/* Rating Badge */}
           <div className="absolute right-4 top-4 z-10">
             <div className="rounded-lg bg-black/50 backdrop-blur-md px-4 py-2 text-sm font-semibold text-white">
-              4.9 • {hotel.reviews?.length ?? 0} reviews
+              4.9 • {reviews.length} reviews
             </div>
           </div>
         </div>
@@ -116,10 +109,10 @@ export default async function HotelPage({ params }: Props) {
         {/* Title Section */}
         <div className="mx-auto max-w-6xl px-4 py-8">
           <div className="flex flex-col gap-3">
-            <p className="text-sm uppercase tracking-[0.15em] text-slate-400 font-medium">
-              Hotel Details
+            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500">
+              Hotel details
             </p>
-            <h1 className="text-5xl font-bold text-white leading-tight">
+            <h1 className="text-4xl font-semibold tracking-wide text-white md:text-5xl">
               {hotel.title}
             </h1>
             <p className="text-slate-300 text-base">{hotel.location}</p>
@@ -127,7 +120,7 @@ export default async function HotelPage({ params }: Props) {
         </div>
 
         {/* Gallery Section */}
-        <HotelGallery title={hotel.title} images={hotel.images ?? undefined} />
+        <HotelGallery title={hotel.title} images={images} />
 
         {/* Main Content */}
         <div className="mx-auto max-w-6xl px-4 py-6">
@@ -135,17 +128,16 @@ export default async function HotelPage({ params }: Props) {
             {/* Left Column */}
             <section className="space-y-6">
               {/* About Section */}
-              <div className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm p-8 shadow-xl transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-900/50">
+              <div className={cn(cardInteractiveClassName, "p-8")}>
                 <h2 className="mb-4 text-2xl font-semibold text-white">
                   About this hotel
                 </h2>
-                <p className="leading-relaxed text-slate-300 text-base">
+                <p className="text-base leading-relaxed text-slate-300">
                   {hotel.description}
                 </p>
               </div>
 
-              {/* Amenities Section */}
-              <div className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm p-8 shadow-xl transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-900/50">
+              <div className={cn(cardInteractiveClassName, "p-8")}>
                 <h2 className="mb-6 text-2xl font-semibold text-white">
                   What this place offers
                 </h2>
@@ -160,10 +152,10 @@ export default async function HotelPage({ params }: Props) {
                   ].map((amenity, index) => (
                     <div
                       key={index}
-                      className="group/item flex items-center gap-2 rounded-lg bg-zinc-800/20 px-3 py-2.5 transition-all duration-200 hover:bg-zinc-800/40 cursor-default"
+                      className="group/item flex items-center gap-2 rounded-lg bg-background/80 px-3 py-2.5 transition hover:bg-background"
                     >
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-blue-400 transition-transform group-hover/item:scale-125" />
-                      <span className="text-sm text-slate-300 font-medium">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#30cfd0]/80 transition-transform group-hover/item:scale-125" />
+                      <span className="text-sm font-medium text-slate-300">
                         {amenity}
                       </span>
                     </div>
@@ -171,17 +163,16 @@ export default async function HotelPage({ params }: Props) {
                 </div>
               </div>
 
-              {/* Reviews Section */}
-              <div className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm p-8 shadow-xl transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-900/50">
+              <div className={cn(cardInteractiveClassName, "p-8")}>
                 <h2 className="mb-6 text-2xl font-semibold text-white">
-                  Reviews ({hotel.reviews?.length ?? 0})
+                  Reviews ({reviews.length})
                 </h2>
-                {(hotel.reviews?.length ?? 0) > 0 ? (
+                {reviews.length > 0 ? (
                   <div className="space-y-4">
-                    {hotel.reviews?.slice(0, 3).map((review, index) => (
+                    {reviews.slice(0, 3).map((review, index) => (
                       <div
                         key={index}
-                        className="border-l-4 border-blue-500/50 bg-blue-500/5 rounded px-4 py-3 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/15 hover:shadow-md cursor-default"
+                        className="rounded-lg border-l-2 border-[#30cfd0]/50 bg-surface/50 px-4 py-3 transition hover:border-[#30cfd0]/70 hover:bg-surface"
                       >
                         <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
                           <span>{review.rating || 5}/5 stars</span>
@@ -206,43 +197,45 @@ export default async function HotelPage({ params }: Props) {
             <aside>
               <div className="sticky top-6 space-y-4">
                 {/* Booking Card */}
-                <div className="rounded-2xl border border-blue-500/30 bg-linear-to-br from-blue-950/80 to-blue-900/60 backdrop-blur-sm p-8 shadow-2xl transition-all duration-300 hover:border-blue-500/50 hover:shadow-blue-500/20">
+                <div
+                  className={cn(
+                    cardInteractiveClassName,
+                    "border-[#30cfd0]/20 p-8",
+                  )}
+                >
                   <div className="mb-6">
-                    <p className="text-xs uppercase tracking-wider text-blue-300 font-semibold">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#30cfd0]/80">
                       Price per night
                     </p>
                     <div className="mt-3 flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-white">
+                      <span className="text-4xl font-semibold text-white">
                         ${hotel.price}
                       </span>
-                      <span className="text-slate-300 font-medium">/night</span>
+                      <span className="font-medium text-slate-400">/night</span>
                     </div>
-                    <div className="mt-3 flex gap-2 text-xs text-blue-200">
-                      <span>✓ Instant book</span>
-                      <span>✓ Free cancellation</span>
+                    <div className="mt-3 flex gap-3 text-xs text-slate-500">
+                      <span>Instant book</span>
+                      <span>Free cancellation</span>
                     </div>
                   </div>
 
                   <div className="mb-6 space-y-3">
-                    <input
-                      type="date"
-                      className="w-full rounded-lg bg-white/10 px-4 py-2.5 text-white placeholder-slate-400 outline-none transition-all duration-200 focus:bg-white/20 focus:ring-2 focus:ring-blue-400/50 hover:bg-white/15"
-                      placeholder="Check-in"
-                    />
-                    <input
-                      type="date"
-                      className="w-full rounded-lg bg-white/10 px-4 py-2.5 text-white placeholder-slate-400 outline-none transition-all duration-200 focus:bg-white/20 focus:ring-2 focus:ring-blue-400/50 hover:bg-white/15"
-                      placeholder="Check-out"
-                    />
+                    <input type="date" className={inputClassName} />
+                    <input type="date" className={inputClassName} />
                   </div>
 
-                  <button className="w-full rounded-lg bg-linear-to-r from-blue-600 to-blue-500 py-3 font-semibold text-white transition-all duration-200 hover:from-blue-500 hover:to-blue-400 active:scale-95 shadow-lg hover:shadow-blue-500/40 hover:shadow-xl">
+                  <button
+                    type="button"
+                    className={cn(
+                      "w-full rounded-xl py-3 text-sm font-semibold transition hover:brightness-110",
+                      brandGradientBg,
+                    )}
+                  >
                     Reserve now
                   </button>
                 </div>
 
-                {/* Location Card */}
-                <div className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm p-6 shadow-xl transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-900/50">
+                <div className={cn(cardInteractiveClassName, "p-6")}>
                   <h3 className="mb-3 text-lg font-semibold text-white">
                     Location
                   </h3>
@@ -253,36 +246,35 @@ export default async function HotelPage({ params }: Props) {
                 </div>
 
                 {/* Host Info */}
-                <div className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm p-6 shadow-xl transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-900/50">
+                <div className={cn(cardInteractiveClassName, "p-6")}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">
                         Hosted by
                       </p>
-                      <p className="mt-2 font-bold text-white text-base">
+                      <p className="mt-2 text-base font-semibold text-white">
                         {hotel.authorId || "Unknown host"}
                       </p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-linear-to-br from-blue-500 to-purple-600 shadow-lg transition-transform duration-300 group-hover:scale-110" />
+                    <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#30cfd0] to-[#0c5eb6] shadow-lg transition group-hover:scale-105" />
                   </div>
                 </div>
 
-                {/* Stay Info */}
-                <div className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-sm p-6 shadow-xl transition-all duration-300 hover:border-zinc-700/50 hover:bg-zinc-900/50">
+                <div className={cn(cardInteractiveClassName, "p-6")}>
                   <h3 className="mb-4 text-lg font-semibold text-white">
                     Stay information
                   </h3>
-                  <ul className="space-y-3 text-sm text-slate-300">
-                    <li className="flex items-start gap-3 transition-all duration-200 hover:text-blue-400">
-                      <span className="text-slate-500 font-medium">•</span>
+                  <ul className="space-y-3 text-sm text-slate-400">
+                    <li className="flex items-start gap-3 transition hover:text-[#30cfd0]/90">
+                      <span className="font-medium text-slate-600">•</span>
                       <span>Check-in: 15:00 (Flexible)</span>
                     </li>
-                    <li className="flex items-start gap-3 transition-all duration-200 hover:text-blue-400">
-                      <span className="text-slate-500 font-medium">•</span>
+                    <li className="flex items-start gap-3 transition hover:text-[#30cfd0]/90">
+                      <span className="font-medium text-slate-600">•</span>
                       <span>Check-out: 11:00</span>
                     </li>
-                    <li className="flex items-start gap-3 transition-all duration-200 hover:text-blue-400">
-                      <span className="text-slate-500 font-medium">•</span>
+                    <li className="flex items-start gap-3 transition hover:text-[#30cfd0]/90">
+                      <span className="font-medium text-slate-600">•</span>
                       <span>Free cancellation up to 48 hours</span>
                     </li>
                   </ul>

@@ -201,6 +201,6 @@ export const ClusterMap = ({ hotels, mapToken, resizeTrigger }: Props) => {
   }, [resizeTrigger]);
 
   return (
-    <div ref={mapRef} className="h-105 w-full overflow-hidden rounded-2xl" />
+    <div ref={mapRef} className="h-full w-full overflow-hidden rounded-2xl" />
   );
 };

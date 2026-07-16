@@ -1,11 +1,13 @@
-import { Hotel } from "@/lib/types/hotel";
+import type { JsonValue } from "@prisma/client/runtime/library";
+import { extractHotelCoordinates } from "@/lib/hotels/extractHotelCoordinates";
 
-type HotelInput = Hotel & {
-  createdAt?: Date | null
-  updatedAt? : Date | null
-}
+export type HotelGeoInput = {
+  id: string;
+  title: string;
+  geometry?: JsonValue;
+};
 
-export function hotelsToGeoJSON(hotels: HotelInput[]): GeoJSON.FeatureCollection<
+export function hotelsToGeoJSON(hotels: HotelGeoInput[]): GeoJSON.FeatureCollection<
   GeoJSON.Point,
   {
     id: string;
@@ -22,30 +24,7 @@ export function hotelsToGeoJSON(hotels: HotelInput[]): GeoJSON.FeatureCollection
     }
   >[] = hotels
     .map((hotel) => {
-      // Try several places for coordinates: geometry (GeoJSON), or latitude/longitude
-      let coords: [number, number] | null = null;
-
-      // geometry might be a GeoJSON-like object
-      try {
-        const geom = hotel.geometry as { coordinates?: unknown } | null | undefined;
-        if (geom && Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) {
-          const [lng, lat] = geom.coordinates;
-          if (typeof lng === "number" && typeof lat === "number") coords = [lng, lat];
-        }
-      } catch (e) {
-        throw new Error(`Error parsing geometry for hotel ${hotel.id}: ${e}`);
-      }
-
-      // fallback to top-level lat/lng fields if present
-      if (!coords) {
-        const hotelRecord = hotel as Record<string, unknown>;
-        const maybeLng = hotelRecord.longitude ?? hotelRecord.lng ?? hotelRecord.lon;
-        const maybeLat = hotelRecord.latitude ?? hotelRecord.lat;
-        if (typeof maybeLng === "number" && typeof maybeLat === "number") {
-          coords = [maybeLng, maybeLat];
-        }
-      }
-
+      const coords = extractHotelCoordinates(hotel);
       if (!coords) return null;
 
       return {
@@ -61,7 +40,7 @@ export function hotelsToGeoJSON(hotels: HotelInput[]): GeoJSON.FeatureCollection
         },
         geometry: {
           type: "Point",
-          coordinates: coords,
+          coordinates: [coords.lng, coords.lat],
         },
       };
     })
@@ -76,4 +55,3 @@ export function hotelsToGeoJSON(hotels: HotelInput[]): GeoJSON.FeatureCollection
     features,
   };
 }
-

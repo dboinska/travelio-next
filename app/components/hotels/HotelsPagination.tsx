@@ -1,4 +1,9 @@
 import Link from "next/link";
+import {
+  paginationActiveClassName,
+  paginationIdleClassName,
+} from "@/lib/design/classes";
+import { cn } from "@/lib/cn";
 
 interface Props {
   currentPage: number;
@@ -7,7 +12,7 @@ interface Props {
 
 function getPaginationRange(currentPage: number, totalPages: number) {
   if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
   }
 
   if (currentPage <= 3) {
@@ -39,58 +44,63 @@ export default function HotelsPagination({ currentPage, totalPages }: Props) {
   const pageRange = getPaginationRange(currentPage, totalPages);
   const showRightEllipsis = pageRange[pageRange.length - 1] < totalPages - 1;
 
+  const linkClass = (active: boolean) =>
+    cn(
+      "inline-flex h-9 min-w-9 items-center justify-center rounded-full px-3 text-sm font-medium transition",
+      active ? paginationActiveClassName : paginationIdleClassName,
+    );
+
   return (
-    <ul className="pagination mt-10">
-      <li className="circle">
-        <Link href="/hotels?page=1" className="page-link">
-          First
-        </Link>
-      </li>
+    <nav
+      aria-label="Pagination"
+      className="mt-12 flex flex-wrap items-center justify-center gap-2"
+    >
+      <Link href="/hotels?page=1" className={linkClass(false)}>
+        First
+      </Link>
 
       {pageRange[0] > 1 && (
-        <li className="circle">
-          <Link href={`/hotels?page=${pageRange[0] - 1}`} className="page-link">
-            ...
-          </Link>
-        </li>
+        <Link
+          href={`/hotels?page=${pageRange[0] - 1}`}
+          className={linkClass(false)}
+        >
+          …
+        </Link>
       )}
 
       {pageRange.map((page) => (
-        <li key={page} className="circle">
-          <Link
-            href={`/hotels?page=${page}`}
-            className={`page-link ${currentPage === page ? "active" : ""}`}
-          >
-            {page}
-          </Link>
-        </li>
+        <Link
+          key={page}
+          href={`/hotels?page=${page}`}
+          className={linkClass(currentPage === page)}
+          aria-current={currentPage === page ? "page" : undefined}
+        >
+          {page}
+        </Link>
       ))}
 
       {showRightEllipsis && (
-        <li className="circle">
-          <Link
-            href={`/hotels?page=${pageRange[pageRange.length - 1] + 1}`}
-            className="page-link hover-off"
-          >
-            ...
-          </Link>
-        </li>
+        <Link
+          href={`/hotels?page=${pageRange[pageRange.length - 1] + 1}`}
+          className={linkClass(false)}
+        >
+          …
+        </Link>
       )}
 
-      <li className="circle">
-        <Link
-          href={`/hotels?page=${Math.min(currentPage + 1, totalPages)}`}
-          className="page-link"
-        >
-          Next
-        </Link>
-      </li>
+      <Link
+        href={`/hotels?page=${Math.min(currentPage + 1, totalPages)}`}
+        className={linkClass(false)}
+      >
+        Next
+      </Link>
 
-      <li className="circle">
-        <Link href={`/hotels?page=${totalPages}`} className="page-link">
-          Last
-        </Link>
-      </li>
-    </ul>
+      <Link
+        href={`/hotels?page=${totalPages}`}
+        className={linkClass(false)}
+      >
+        Last
+      </Link>
+    </nav>
   );
 }
