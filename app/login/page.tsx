@@ -8,7 +8,22 @@ import {
   linkAccentClassName,
 } from "@/lib/design/classes";
 
-export default function LoginPage() {
+type Props = {
+  searchParams: Promise<{
+    callbackUrl?: string;
+  }>;
+};
+
+function resolveCallbackUrl(value?: string) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/";
+  }
+  return value;
+}
+
+export default async function LoginPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const callbackUrl = resolveCallbackUrl(params.callbackUrl);
   return (
     <>
       <Navbar />
@@ -40,7 +55,7 @@ export default function LoginPage() {
                 Use your account credentials to sign in.
               </p>
 
-              <LoginForm />
+              <LoginForm callbackUrl={callbackUrl} />
 
               <p className="mt-6 text-sm text-slate-400">
                 Don&apos;t have an account?{" "}
