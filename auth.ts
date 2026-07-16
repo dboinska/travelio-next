@@ -2,11 +2,9 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { authSecret } from "@/lib/auth/secret";
 
-const nextAuthSecret = process.env.AUTH_SECRET ?? "development-secret";
-if (!process.env.AUTH_SECRET) {
-  console.warn("AUTH_SECRET is not set. Using fallback development secret.");
-}
+export { authSecret };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -53,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  secret: nextAuthSecret,
+  secret: authSecret,
 });
 
 export const { GET, POST } = handlers;

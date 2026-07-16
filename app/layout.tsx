@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { auth } from "@/auth";
+import { getServerSession } from "@/lib/auth/getServerSession";
 
 export const metadata: Metadata = {
   title: "Travelio",
@@ -13,7 +13,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const session = await getServerSession();
 
   return (
     <html lang="en" className="h-full antialiased">
