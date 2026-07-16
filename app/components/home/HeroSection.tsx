@@ -33,10 +33,10 @@ export default function HeroSection({ globeData }: Props) {
             </div>
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <AppLink href="/hotels">Browse hotels</AppLink>
-              <AppLink href="/hotels/new" variant="secondary">
-                Add hotel
+              <AppLink href="/hotels" variant="secondary">
+                Browse hotels
               </AppLink>
+              <AppLink href="/hotels/new">Add hotel</AppLink>
             </div>
           </div>
 

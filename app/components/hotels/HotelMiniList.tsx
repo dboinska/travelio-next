@@ -32,7 +32,7 @@ export default function HotelMiniList({ hotels }: Props) {
                 {coverImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={coverImage.url}
+                    src={coverImage.src}
                     alt=""
                     className="h-full w-full object-cover"
                   />

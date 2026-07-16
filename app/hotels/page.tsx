@@ -56,7 +56,7 @@ export default async function Hotels({ searchParams }: Props) {
               map or browse the grid below.
             </p>
           </div>
-          <AppLink href="/hotels/new" variant="secondary" className="shrink-0">
+          <AppLink href="/hotels/new" className="shrink-0">
             Add hotel
           </AppLink>
         </header>
