@@ -122,7 +122,7 @@ export default function HotelsMapSidebar({ hotels, geoJSONData }: Props) {
       </div>
 
       <div className="flex flex-col overflow-hidden rounded-2xl border border-border lg:hidden">
-        <div className="h-[45vh] min-h-[240px] w-full">
+        <div className="h-[45vh] min-h-60 w-full">
           <ClusterMap hotels={filteredGeoJSON} resizeTrigger={false} />
         </div>
         <div className="flex flex-col bg-background">

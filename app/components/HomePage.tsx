@@ -8,9 +8,12 @@ type Props = {
 
 export default function HomePage({ globeData }: Props) {
   return (
-    <section className="space-y-10">
+    <>
       <HeroSection globeData={globeData} />
-      <FeaturedDestinations />
-    </section>
+
+      <div className="container mx-auto space-y-10 px-4 pb-10 pt-10">
+        <FeaturedDestinations />
+      </div>
+    </>
   );
 }

@@ -6,7 +6,11 @@ import HotelMap from "../../components/hotels/HotelMap";
 import type { Hotel } from "@/lib/types/hotel";
 import { getHotelImages, getHotelReviews } from "@/lib/types/hotel";
 import HotelGallery from "@/app/components/hotels/HotelGallery";
-import { cardInteractiveClassName, inputClassName, brandGradientBg } from "@/lib/design/classes";
+import {
+  cardInteractiveClassName,
+  inputClassName,
+  brandGradientBg,
+} from "@/lib/design/classes";
 import { extractHotelCoordinates } from "@/lib/hotels/extractHotelCoordinates";
 import { cn } from "@/lib/cn";
 
@@ -193,7 +197,12 @@ export default async function HotelPage({ params }: Props) {
             <aside>
               <div className="sticky top-6 space-y-4">
                 {/* Booking Card */}
-                <div className={cn(cardInteractiveClassName, "border-[#30cfd0]/20 p-8")}>
+                <div
+                  className={cn(
+                    cardInteractiveClassName,
+                    "border-[#30cfd0]/20 p-8",
+                  )}
+                >
                   <div className="mb-6">
                     <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-[#30cfd0]/80">
                       Price per night
@@ -247,7 +256,7 @@ export default async function HotelPage({ params }: Props) {
                         {hotel.authorId || "Unknown host"}
                       </p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#30cfd0] to-[#0c5eb6] shadow-lg transition group-hover:scale-105" />
+                    <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#30cfd0] to-[#0c5eb6] shadow-lg transition group-hover:scale-105" />
                   </div>
                 </div>
 

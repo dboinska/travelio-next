@@ -59,6 +59,7 @@ function distanceSq(
 }
 
 const MAX_GLOBE_POINTS = 50;
+const MAX_GLOBE_ARCS = 64;
 const NEIGHBORS_PER_POINT = 2;
 const LONG_HAUL_PER_EUROPEAN = 4;
 
@@ -197,5 +198,5 @@ export function buildGlobeArcs(points: GlobePointLike[]): GlobeArcLike[] {
     }
   }
 
-  return arcs;
+  return arcs.slice(0, MAX_GLOBE_ARCS);
 }

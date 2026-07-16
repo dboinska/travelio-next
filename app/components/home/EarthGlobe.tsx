@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
 import { useFrame } from "@react-three/fiber";
 import ThreeGlobe from "three-globe";
 import {
@@ -11,17 +17,25 @@ import {
   type Mesh as MeshType,
   type Texture,
 } from "three";
+import {
+  GLOBE_SCALE,
+  POINT_ALTITUDE,
+  POINT_RADIUS,
+} from "@/lib/globe/constants";
+import { createProceduralCloudTexture } from "@/lib/globe/createCloudTexture";
 import type { GlobeArc, GlobePoint } from "@/lib/globe/types";
 
 const EARTH_TEXTURE =
   "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
 const CLOUDS_TEXTURE = "/textures/clouds.png";
-const GLOBE_SCALE = 0.9;
+const CLOUDS_TEXTURE_FALLBACK =
+  "https://raw.githubusercontent.com/turban/webgl-earth/master/images/fair_clouds_4k.png";
+const CLOUD_SEGMENTS = 64;
 
 const CLOUD_LAYERS = [
-  { alt: 0.004, opacity: 0.16, displacement: 0, speed: -0.018 },
-  { alt: 0.009, opacity: 0.24, displacement: 5.5, speed: -0.026 },
-  { alt: 0.018, opacity: 0.1, displacement: 9, speed: -0.014 },
+  { alt: 0.004, opacity: 0.2, displacement: 0, speed: -0.018 },
+  { alt: 0.009, opacity: 0.32, displacement: 5.5, speed: -0.026 },
+  { alt: 0.018, opacity: 0.14, displacement: 9, speed: -0.014 },
 ] as const;
 
 type Props = {
@@ -76,7 +90,12 @@ function getCloudSampleData(texture: Texture) {
   if (!ctx) return null;
 
   ctx.drawImage(image, 0, 0);
-  const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const { data, width, height } = ctx.getImageData(
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+  );
   return { data, width, height };
 }
 
@@ -85,7 +104,11 @@ function createCloudGeometry(
   sampleData: { data: Uint8ClampedArray; width: number; height: number },
   displacement: number,
 ) {
-  const geometry = new SphereGeometry(baseRadius, 96, 96);
+  const geometry = new SphereGeometry(
+    baseRadius,
+    CLOUD_SEGMENTS,
+    CLOUD_SEGMENTS,
+  );
   if (displacement <= 0) return geometry;
 
   const positions = geometry.attributes.position;
@@ -110,9 +133,9 @@ function createCloudGeometry(
 
     positions.setXYZ(
       i,
-      x + (normals.getX(i) * offset),
-      y + (normals.getY(i) * offset),
-      z + (normals.getZ(i) * offset),
+      x + normals.getX(i) * offset,
+      y + normals.getY(i) * offset,
+      z + normals.getZ(i) * offset,
     );
   }
 
@@ -127,8 +150,8 @@ function configureGlobe(globe: ThreeGlobe) {
     .pointLat("lat")
     .pointLng("lng")
     .pointColor(() => "#30cfd0")
-    .pointAltitude(0.012)
-    .pointRadius(0.3)
+    .pointAltitude(POINT_ALTITUDE)
+    .pointRadius(POINT_RADIUS)
     .arcStartLat("startLat")
     .arcStartLng("startLng")
     .arcEndLat("endLat")
@@ -141,7 +164,10 @@ function configureGlobe(globe: ThreeGlobe) {
     .arcDashAnimateTime(3200);
 }
 
-export default function EarthGlobe({ points, arcs }: Props) {
+const EarthGlobe = forwardRef<ThreeGlobe, Props>(function EarthGlobe(
+  { points, arcs },
+  ref,
+) {
   const cloudLayersRef = useRef<CloudLayerMesh[]>([]);
   const cloudsTextureRef = useRef<Texture | null>(null);
 
@@ -151,6 +177,8 @@ export default function EarthGlobe({ points, arcs }: Props) {
     return instance;
   }, []);
 
+  useImperativeHandle(ref, () => globe, [globe]);
+
   useEffect(() => {
     globe.pointsData(points);
     globe.arcsData(arcs);
@@ -158,16 +186,18 @@ export default function EarthGlobe({ points, arcs }: Props) {
 
   useEffect(() => {
     let disposed = false;
-    const loader = new TextureLoader();
 
-    loader.load(CLOUDS_TEXTURE, (cloudsTexture) => {
+    const addCloudLayers = (cloudsTexture: Texture) => {
       if (disposed) {
         cloudsTexture.dispose();
         return;
       }
 
       const sampleData = getCloudSampleData(cloudsTexture);
-      if (!sampleData) return;
+      if (!sampleData) {
+        cloudsTexture.dispose();
+        return;
+      }
 
       cloudsTextureRef.current = cloudsTexture;
 
@@ -176,7 +206,11 @@ export default function EarthGlobe({ points, arcs }: Props) {
 
       for (const layer of CLOUD_LAYERS) {
         const radius = globeRadius * (1 + layer.alt);
-        const geometry = createCloudGeometry(radius, sampleData, layer.displacement);
+        const geometry = createCloudGeometry(
+          radius,
+          sampleData,
+          layer.displacement,
+        );
         const material = new MeshPhongMaterial({
           map: cloudsTexture,
           transparent: true,
@@ -185,6 +219,7 @@ export default function EarthGlobe({ points, arcs }: Props) {
         });
 
         const mesh = new Mesh(geometry, material);
+        mesh.renderOrder = 2;
         mesh.userData.isCloudLayer = true;
         mesh.userData.cloudSpeed = layer.speed;
         mesh.rotation.y = layer.alt * 12;
@@ -193,6 +228,13 @@ export default function EarthGlobe({ points, arcs }: Props) {
       }
 
       cloudLayersRef.current = layers;
+    };
+
+    const loader = new TextureLoader();
+    loader.load(CLOUDS_TEXTURE, addCloudLayers, undefined, () => {
+      loader.load(CLOUDS_TEXTURE_FALLBACK, addCloudLayers, undefined, () => {
+        if (!disposed) addCloudLayers(createProceduralCloudTexture());
+      });
     });
 
     return () => {
@@ -215,4 +257,6 @@ export default function EarthGlobe({ points, arcs }: Props) {
   });
 
   return <primitive object={globe} scale={GLOBE_SCALE} />;
-}
+});
+
+export default EarthGlobe;

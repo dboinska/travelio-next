@@ -9,6 +9,12 @@ async function getGlobeData() {
   try {
     const hotels = await prisma.hotel.findMany({
       orderBy: { date: "desc" },
+      select: {
+        id: true,
+        title: true,
+        location: true,
+        geometry: true,
+      },
     });
     return hotelsToGlobeData(hotels);
   } catch {
@@ -23,7 +29,7 @@ export default async function Page() {
     <div className="flex min-h-screen flex-col text-white">
       <Navbar />
 
-      <main className="container mx-auto flex-1 px-4 py-10">
+      <main className="flex-1">
         <HomePage globeData={globeData} />
       </main>
       <Footer />

@@ -37,6 +37,6 @@ function buildStar(id: number, biasRight: boolean): HeroStar {
 
 /** Deterministic star positions — stable between SSR and client. */
 export const heroStars: HeroStar[] = [
-  ...Array.from({ length: 45 }, (_, id) => buildStar(id, false)),
-  ...Array.from({ length: 95 }, (_, id) => buildStar(id + 45, true)),
+  ...Array.from({ length: 32 }, (_, id) => buildStar(id, false)),
+  ...Array.from({ length: 64 }, (_, id) => buildStar(id + 32, true)),
 ];

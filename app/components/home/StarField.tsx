@@ -3,14 +3,7 @@ import { cn } from "@/lib/cn";
 
 export default function StarField() {
   return (
-    <div
-      aria-hidden
-      className={cn(
-        "pointer-events-none absolute inset-0 overflow-hidden",
-        "[mask-image:radial-gradient(ellipse_95%_100%_at_50%_55%,black_8%,transparent_96%)]",
-        "lg:[mask-image:radial-gradient(ellipse_88%_95%_at_72%_50%,black_6%,transparent_94%)]",
-      )}
-    >
+    <div aria-hidden className="pointer-events-none absolute inset-0">
       {heroStars.map((star) => (
         <span
           key={star.id}
