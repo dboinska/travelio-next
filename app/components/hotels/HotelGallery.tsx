@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { Images } from "lucide-react";
+import HotelImage from "@/app/components/hotels/HotelImage";
+import type { HotelImage as HotelImageView } from "@/lib/types/hotel";
+import {
+  formatMorePhotosLabel,
+  getHotelGalleryLayout,
+} from "@/lib/hotels/hotelGalleryLayout";
+import { cn } from "@/lib/cn";
 
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
@@ -10,12 +17,11 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 interface HotelGalleryProps {
   title: string;
-  images?: {
-    url: string;
-  }[];
+  images?: HotelImageView[];
 }
 
 export default function HotelGallery({
@@ -24,127 +30,179 @@ export default function HotelGallery({
 }: HotelGalleryProps) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const layout = getHotelGalleryLayout(images);
 
-  if (!images.length) {
+  if (!layout) {
     return (
-      <div className="flex h-125 items-center justify-center rounded-3xl border border-border bg-surface text-muted">
-        No image available
-      </div>
+      <section className="mx-auto w-full min-w-0 max-w-6xl px-4 pt-6">
+        <div className="flex h-72 flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-surface text-muted md:h-96">
+          <Images size={28} className="text-slate-600" strokeWidth={1.5} />
+          <p className="text-sm">No photos available</p>
+        </div>
+      </section>
     );
   }
 
-  const mainImage = images[1] ?? images[0];
-  const previewImages = images.slice(2, 4);
+  const {
+    total,
+    main,
+    sidePreviews,
+    morePhotosCount,
+    morePhotosStartIndex,
+    slides,
+  } = layout;
 
-  const slides = [...images.slice(1), images[0]].map((image) => ({
-    src: image.url,
-  }));
+  function openAt(nextIndex: number) {
+    setIndex(nextIndex);
+    setOpen(true);
+  }
+
+  function openSidePreview(previewIndex: number) {
+    const isLastSide = previewIndex === sidePreviews.length - 1;
+
+    if (isLastSide && morePhotosCount > 0) {
+      openAt(morePhotosStartIndex);
+      return;
+    }
+
+    openAt(previewIndex + 1);
+  }
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-6">
-      <div className="relative overflow-hidden rounded-3xl">
-        <div className="grid gap-2 md:grid-cols-4 md:grid-rows-2">
-          <div
-            className="relative h-65 cursor-pointer md:col-span-3 md:row-span-2 md:h-130"
-            onClick={() => {
-              setIndex(0);
-              setOpen(true);
-            }}
+    <section className="mx-auto w-full min-w-0 max-w-6xl px-4 pt-6">
+      <div className="relative max-w-full overflow-hidden rounded-3xl border border-border/70">
+        {total === 1 ? (
+          <button
+            type="button"
+            onClick={() => openAt(0)}
+            className="relative block h-72 w-full min-w-0 cursor-pointer overflow-hidden md:h-130"
           >
-            <Image
-              src={mainImage.url}
+            <HotelImage
+              src={main.src}
               alt={title}
               fill
               priority
-              sizes="(max-width:768px) 100vw, 75vw"
-              className="object-cover transition duration-300 hover:scale-[1.02]"
+              sizes="(max-width:768px) 100vw, 1152px"
+              className="object-cover transition duration-300 hover:brightness-105"
             />
-          </div>
-
-          {previewImages.map((image, previewIndex) => (
-            <div
-              key={previewIndex}
-              onClick={() => {
-                setIndex(previewIndex + 1);
-                setOpen(true);
-              }}
-              className="relative hidden h-63.5 cursor-pointer overflow-hidden md:block"
-            >
-              <Image
-                src={image.url}
-                alt={`${title} ${previewIndex + 1}`}
-                fill
-                sizes="25vw"
-                className="object-cover transition duration-300 hover:scale-105"
-              />
-
-              {previewIndex === 1 && images.length > 4 && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/65 backdrop-blur-sm">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-white">
-                      +{images.length - 3}
-                    </div>
-                    <div className="mt-1 text-sm text-white/80">
-                      Pokaż pozostałe
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {images.length > 1 && (
-          <button
-            onClick={() => {
-              setIndex(0);
-              setOpen(true);
-            }}
-            className="
-              absolute bottom-4 right-8 rounded-xl bg-black/70
-              px-4 py-2 text-sm font-medium text-white
-              backdrop-blur-md transition hover:bg-black/90
-            "
-          >
-            Zobacz wszystkie zdjęcia ({images.length + 1})
           </button>
+        ) : (
+          <>
+            <div className="hidden min-w-0 gap-1.5 md:grid md:grid-cols-4 md:grid-rows-2 md:gap-2">
+              <button
+                type="button"
+                onClick={() => openAt(0)}
+                className="relative h-130 min-w-0 cursor-pointer overflow-hidden md:col-span-3 md:row-span-2"
+              >
+                <HotelImage
+                  src={main.src}
+                  alt={title}
+                  fill
+                  priority
+                  sizes="75vw"
+                  className="object-cover transition duration-300 hover:brightness-105"
+                />
+              </button>
+
+              {sidePreviews.map((image, previewIndex) => {
+                const isLastSide = previewIndex === sidePreviews.length - 1;
+                const showMoreOverlay = isLastSide && morePhotosCount > 0;
+
+                return (
+                  <button
+                    key={image.index}
+                    type="button"
+                    onClick={() => openSidePreview(previewIndex)}
+                    className="relative h-63.5 min-w-0 cursor-pointer overflow-hidden"
+                  >
+                    <HotelImage
+                      src={image.src}
+                      alt={`${title} ${previewIndex + 2}`}
+                      fill
+                      sizes="25vw"
+                      className="object-cover transition duration-300 hover:brightness-105"
+                    />
+
+                    {showMoreOverlay ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-[2px]">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-white">
+                            +{morePhotosCount}
+                          </div>
+                          <div className="mt-1 text-xs text-white/80">
+                            {formatMorePhotosLabel(morePhotosCount)}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openAt(0)}
+              className="relative block h-72 w-full min-w-0 cursor-pointer overflow-hidden md:hidden"
+            >
+              <HotelImage
+                src={main.src}
+                alt={title}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+              />
+            </button>
+          </>
         )}
+
+        <button
+          type="button"
+          onClick={() => openAt(0)}
+          className={cn(
+            "absolute bottom-4 right-4 rounded-xl border border-white/10 bg-black/70",
+            "px-4 py-2 text-sm font-medium text-white backdrop-blur-md",
+            "transition hover:bg-black/85",
+          )}
+        >
+          {total === 1 ? "View photo" : `Show all photos (${total})`}
+        </button>
       </div>
 
-      {/* Mobile thumbnails */}
-      {images.length > 1 && (
-        <div className="mt-4 flex gap-3 overflow-x-auto pb-2 md:hidden">
-          {slides.map((slide, slideIndex) => (
-            <div
-              key={slideIndex}
-              onClick={() => {
-                setIndex(slideIndex);
-                setOpen(true);
-              }}
-              className="
-                relative h-20 w-28 shrink-0 cursor-pointer
-                overflow-hidden rounded-xl border border-border
-              "
+      {total > 1 ? (
+        <div className="mt-4 flex w-full max-w-full gap-3 overflow-x-auto pb-2 md:hidden">
+          {images.map((image, slideIndex) => (
+            <button
+              key={image.index}
+              type="button"
+              onClick={() => openAt(slideIndex)}
+              className={cn(
+                "relative h-20 w-28 shrink-0 cursor-pointer overflow-hidden rounded-xl",
+                "border border-border transition hover:border-[#30cfd0]/40",
+                slideIndex === 0 && "ring-1 ring-[#30cfd0]/40",
+              )}
             >
-              <Image
-                src={slide.src}
+              <HotelImage
+                src={image.src}
                 alt={`${title} ${slideIndex + 1}`}
                 fill
                 sizes="112px"
                 className="object-cover"
               />
-            </div>
+            </button>
           ))}
         </div>
-      )}
+      ) : null}
 
       <Lightbox
         open={open}
         close={() => setOpen(false)}
         index={index}
         slides={slides}
-        plugins={[Zoom, Thumbnails, Counter]}
-        carousel={{ finite: false }}
+        plugins={[Counter, Zoom, Thumbnails]}
+        carousel={{ finite: true }}
+        counter={{ separator: " / " }}
         thumbnails={{
           position: "bottom",
           width: 120,

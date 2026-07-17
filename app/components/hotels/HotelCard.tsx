@@ -1,7 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
-import { Hotel, getHotelImages } from "@/lib/types/hotel";
+import type { Hotel } from "@/lib/types/hotel";
+import { getHotelImages } from "@/lib/types/hotel";
+import HotelImage from "@/app/components/hotels/HotelImage";
 import { cardInteractiveClassName } from "@/lib/design/classes";
 import { cn } from "@/lib/cn";
 
@@ -22,8 +23,8 @@ export default function HotelCard({ hotel }: Props) {
     >
       <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-surface">
         {coverImage ? (
-          <Image
-            src={coverImage.url}
+          <HotelImage
+            src={coverImage.src}
             alt={hotel.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

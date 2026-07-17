@@ -6,7 +6,11 @@ import { signIn, type SignInResponse } from "next-auth/react";
 import { brandGradientBg, inputClassName, labelClassName } from "@/lib/design/classes";
 import { cn } from "@/lib/cn";
 
-export default function LoginForm() {
+type Props = {
+  callbackUrl?: string;
+};
+
+export default function LoginForm({ callbackUrl = "/" }: Props) {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -27,13 +31,13 @@ export default function LoginForm() {
         redirect: false,
         username,
         password,
-        callbackUrl: "/",
+        callbackUrl,
       })) as SignInResponse | undefined;
 
       if (result?.error) {
         setError(result.error || "Invalid username or password");
       } else {
-        router.push(result?.url ?? "/");
+        router.push(result?.url ?? callbackUrl);
         router.refresh();
       }
     } catch {

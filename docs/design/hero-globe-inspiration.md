@@ -1,37 +1,37 @@
-# Hero glob — inspiracja i implementacja
+# Hero globe — inspiration and implementation
 
-## Inspiracja
+## Inspiration
 
-Mockup koncepcyjny strony głównej Travelio (ciemny motyw, glob 3D, trasy lotów, chmury, markery destynacji).
+Concept mockup for the Travelio home page (dark theme, 3D globe, flight routes, clouds, destination markers).
 
-![Mockup hero](./hero-mockup.png)
+![Hero mockup](./hero-mockup.png)
 
-## Co zaimplementowano (Faza 1–2)
+## Implemented (Phase 1–2)
 
-| Element z mockupu | Status | Pliki |
+| Mockup element | Status | Files |
 |---|---|---|
-| Glob z teksturą Ziemi | ✅ | `app/components/home/EarthGlobe.tsx` |
-| Auto-rotacja + obrót myszą | ✅ | `GlobeCanvas.tsx` (`OrbitControls`) |
-| Markery lokalizacji | ✅ | `lib/globe/hotelsToGlobeData.ts` |
-| Trasy lotnicze (łuki) | ✅ | `EarthGlobe.tsx`, `lib/globe/globeData.ts` |
-| Chmury dopasowane do kuli | ✅ | `EarthGlobe.tsx` (warstwy sferyczne) |
-| Hero layout (tekst + glob) | ✅ | `app/components/home/HeroSection.tsx` |
-| Wyspa 3D w foreground | ⏳ | planowane później |
-| Hover karty hotelu na markerze | ⏳ | Faza 2 |
-| Bloom / post-processing | ⏳ | Faza 3 |
-| GSAP scroll między sekcjami | ⏳ | Faza 3 |
+| Earth-textured globe | ✅ | `app/components/home/EarthGlobe.tsx` |
+| Auto-rotation + mouse drag | ✅ | `GlobeCanvas.tsx` (`OrbitControls`) |
+| Location markers | ✅ | `lib/globe/hotelsToGlobeData.ts` |
+| Flight routes (arcs) | ✅ | `EarthGlobe.tsx`, `lib/globe/globeData.ts` |
+| Cloud layer on the sphere | ✅ | `EarthGlobe.tsx` (spherical layers) |
+| Hero layout (copy + globe) | ✅ | `app/components/home/HeroSection.tsx` |
+| 3D island in foreground | ⏳ | planned later |
+| Hotel card hover on marker | ⏳ | Phase 2 |
+| Bloom / post-processing | ⏳ | Phase 3 |
+| GSAP scroll between sections | ⏳ | Phase 3 |
 
 ## Stack
 
 - `@react-three/fiber`, `@react-three/drei`, `three`, `three-globe`
-- Dane: Prisma (`geometry.coordinates`) → fallback `lib/globe/globeData.ts`
+- Data: Prisma (`geometry.coordinates`) → fallback `lib/globe/globeData.ts`
 
-## Assety
+## Assets
 
-- `public/textures/clouds.png` — mapa chmur equirectangular (three-globe / webgl-earth)
-- Tekstura Ziemi: CDN three-globe (`earth-blue-marble.jpg`)
+- `public/textures/clouds.png` — equirectangular cloud map (three-globe / webgl-earth)
+- Earth texture: three-globe CDN (`earth-blue-marble.jpg`)
 
-## Struktura komponentów
+## Component structure
 
 ```
 HomePage
@@ -39,6 +39,6 @@ HomePage
     ├── copy + CTA
     └── HeroGlobe (lazy, client)
         └── GlobeCanvas
-            ├── EarthGlobe (three-globe + chmury)
+            ├── EarthGlobe (three-globe + clouds)
             └── OrbitControls
 ```

@@ -13,7 +13,7 @@ export type HotelCoordinatesSource = {
   geometry?: JsonValue;
 };
 
-/** Współrzędne hotelu: GeoJSON Point lub { longitude, latitude }. */
+/** Hotel coordinates from GeoJSON Point or { longitude, latitude }. */
 export function extractHotelCoordinates(
   hotel: HotelCoordinatesSource,
 ): { lng: number; lat: number } | null {
@@ -44,7 +44,7 @@ export function extractHotelCoordinates(
   return null;
 }
 
-/** Przybliżony bounding box Europy (bez Rosji wschodniej). */
+/** Approximate Europe bounding box (excluding far eastern Russia). */
 export function isInEurope(lng: number, lat: number): boolean {
   return lng >= -25 && lng <= 45 && lat >= 35 && lat <= 72;
 }

@@ -1,8 +1,29 @@
 import { JsonValue } from "@prisma/client/runtime/library";
+import {
+  isLegacyUrlHotelImage,
+  isStoredHotelImage,
+  resolveHotelImageSrc,
+} from "@/lib/hotels/storedHotelImage";
+import { isAllowedHotelImageUrl } from "@/lib/hotels/allowedImageUrls";
 
-export type HotelImage = {
+export type StoredHotelImageRecord = {
+  storage: "database";
+  filename: string;
+  mimeType: string;
+  data: string;
+};
+
+export type LegacyUrlHotelImage = {
   url: string;
   filename?: string;
+};
+
+export type HotelImageRecord = StoredHotelImageRecord | LegacyUrlHotelImage;
+
+export type HotelImage = {
+  src: string;
+  filename?: string;
+  index: number;
 };
 
 export type HotelReview = {
@@ -21,19 +42,45 @@ export type Hotel = {
   date?: Date | null;
   geometry?: JsonValue;
   authorId?: string | null;
-  images?: HotelImage[] | JsonValue | null;
+  images?: HotelImageRecord[] | JsonValue | null;
   reviews?: HotelReview[] | JsonValue | null;
 };
 
-export function getHotelImages(hotel: Pick<Hotel, "images">): HotelImage[] {
+export function getHotelImageRecords(
+  hotel: Pick<Hotel, "images">,
+): HotelImageRecord[] {
   if (!hotel.images || !Array.isArray(hotel.images)) return [];
+
   return (hotel.images as unknown[]).filter(
-    (image): image is HotelImage =>
+    (image): image is HotelImageRecord =>
       typeof image === "object" &&
       image !== null &&
-      "url" in image &&
-      typeof (image as HotelImage).url === "string",
+      (isStoredHotelImage(image as HotelImageRecord) ||
+        isLegacyUrlHotelImage(image as HotelImageRecord)),
   );
+}
+
+export function getHotelImages(
+  hotel: Pick<Hotel, "id" | "images">,
+): HotelImage[] {
+  const views: HotelImage[] = [];
+
+  for (const [index, record] of getHotelImageRecords(hotel).entries()) {
+    const src = resolveHotelImageSrc(hotel.id, record, index);
+    if (!src) continue;
+
+    if (isLegacyUrlHotelImage(record) && !isAllowedHotelImageUrl(src)) {
+      continue;
+    }
+
+    views.push({
+      src,
+      filename: isStoredHotelImage(record) ? record.filename : record.filename,
+      index,
+    });
+  }
+
+  return views;
 }
 
 export function getHotelReviews(hotel: Pick<Hotel, "reviews">): HotelReview[] {
@@ -42,4 +89,15 @@ export function getHotelReviews(hotel: Pick<Hotel, "reviews">): HotelReview[] {
     (review): review is HotelReview =>
       typeof review === "object" && review !== null,
   );
+}
+
+/** @deprecated Use getHotelImages */
+export function getHotelImagesLegacy(hotel: Pick<Hotel, "images">) {
+  return getHotelImageRecords(hotel)
+    .filter(isLegacyUrlHotelImage)
+    .map((image, index) => ({
+      url: image.url,
+      filename: image.filename,
+      index,
+    }));
 }
