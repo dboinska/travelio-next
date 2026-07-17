@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import CreateHotelForm from "@/app/components/hotels/CreateHotelForm";
@@ -45,30 +46,46 @@ export default async function EditHotelPage({ params }: Props) {
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-8">
-        <header className="mb-8 space-y-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-slate-500">
-            Host listing
-          </p>
-          <h1 className="text-3xl font-semibold tracking-[0.12em] text-white md:text-4xl">
-            Edit hotel
-          </h1>
-          <p className="max-w-2xl text-[15px] leading-relaxed text-slate-400">
-            Update details for{" "}
-            <span className="text-white/85">{hotel.title}</span>.
-          </p>
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-8">
+        <Link
+          href={`/hotels/${id}`}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-400 transition hover:text-white"
+        >
+          <ChevronLeft size={16} strokeWidth={1.75} />
+          Back to listing
+        </Link>
+
+        <header className="mt-6 border-b border-border/70 pb-8">
+          <div className="space-y-3">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-slate-500">
+              Host listing
+            </p>
+            <h1
+              id="edit-hotel-title"
+              className="text-3xl font-semibold tracking-[0.12em] text-white md:text-4xl"
+            >
+              Edit hotel
+            </h1>
+            <p className="max-w-2xl text-[15px] leading-relaxed text-slate-400">
+              Update details for{" "}
+              <span className="text-white/85">{hotel.title}</span>.
+            </p>
+          </div>
         </header>
 
-        <CreateHotelForm
-          key={id}
-          hotelId={id}
-          defaultValues={hotelToFormDefaults(hotel)}
-          existingImages={hotelToExistingImages(hotel)}
-        />
+        <div className="pt-8">
+          <CreateHotelForm
+            key={id}
+            headingId="edit-hotel-title"
+            hotelId={id}
+            defaultValues={hotelToFormDefaults(hotel)}
+            existingImages={hotelToExistingImages(hotel)}
+          />
+        </div>
 
-        <p className="mt-6 text-sm text-slate-400">
+        <p className="mt-8 text-sm text-slate-400">
           <Link href={`/hotels/${id}`} className={linkAccentClassName}>
-            Back to listing
+            View public listing
           </Link>
         </p>
       </main>
