@@ -7,7 +7,6 @@ import {
   mergeHotelImages,
   parseKeptExistingIndices,
   parseUploadedImageFiles,
-  type StoredHotelImage,
 } from "@/lib/hotels/storedHotelImage";
 import type { HotelImageRecord } from "@/lib/types/hotel";
 

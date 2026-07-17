@@ -29,6 +29,8 @@ export default function GlobeCameraFit({ focused }: { focused: boolean }) {
     const targetFov = (2 * Math.atan(halfFovRad / margin) * 180) / Math.PI;
 
     if (Math.abs(camera.fov - targetFov) > 0.05) {
+      // Three.js cameras are updated in-place each frame; R3F expects this pattern.
+      // eslint-disable-next-line react-hooks/immutability -- PerspectiveCamera FOV must be mutated in useFrame
       camera.fov += (targetFov - camera.fov) * 0.12;
       camera.updateProjectionMatrix();
     }
